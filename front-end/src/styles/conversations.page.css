@@ -1,0 +1,110 @@
+.divConversation{
+  width: 40%;
+  height: calc(100vh - 128px);
+  overflow-y: scroll;
+  position: relative;
+  max-width: 400px;
+}
+
+.avatar{
+  width: 50px;
+}
+
+.messagePreview{
+  width: calc(100% - 120px);
+}
+
+.messagePreview > p{
+  font-size: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #BDBDBD;
+}
+
+.notification{
+  position: absolute;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 50px;
+}
+
+.notification > p {
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.divMessages{
+  width: 80%;
+  height: calc(100vh - 128px);
+  position: relative;
+}
+
+.messagesHeader{
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  height: 64px;
+  gap: 10px;
+  position: fixed;
+  width: 100%;
+}
+
+.messagesBody{
+  margin-top: 64px;
+  height: calc(100vh - 270px);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+}
+
+.messageSend{
+  background-color: #212121;
+  padding: 15px 10px;
+  border-radius: 10px;
+  display: flex;
+  position: relative;
+  align-self: flex-start;
+  max-width: 50%;
+  margin-bottom: 5px;
+}
+
+.messageTime{
+  color: #dadada;
+  font-size: 10px;
+  position: absolute;
+  bottom: 1px;
+  right: 10px;
+}
+
+.messageReceived{
+  background-color: #2195f3f1;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  position: relative;
+  align-self: flex-end;
+  max-width: 50%;
+  margin-bottom: 5px;
+}
+
+.messagesFooter{
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 10px;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  max-width: 700px;
+}
