@@ -5,9 +5,10 @@
     <router-view />
   </v-main>
 
-  <NavBar @define-page-title="(title:string) => pageTitle = title"></NavBar>
+  <NavBar 
+    @define-page-title="(title:string) => pageTitle = title"
+  ></NavBar>
  
-  <AppFooter />
 </template>
 
 <script lang="ts" setup>

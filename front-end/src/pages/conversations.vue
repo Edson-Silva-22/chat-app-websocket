@@ -5,7 +5,7 @@
         <v-list-item 
           height="70" 
           value="1"
-          active-color="blue"
+          color="blue"
         >
           <div class="d-flex ga-3">
             <div class="avatar">
@@ -96,6 +96,7 @@
             variant="solo"
             rounded
             hide-details
+            v-model="newMessage"
           ></v-text-field>
   
           <v-btn 
@@ -103,6 +104,7 @@
             icon="mdi-send"
             width="56"
             height="56"
+            @click="sendMessage"
           ></v-btn>
         </div>
       </div>
@@ -112,7 +114,28 @@
 </template>
 
 <script lang="ts" setup>
-  //
+  import socketClient from '@/plugins/socketClient';
+
+  const newMessage = ref<string>('')
+
+  function sendMessage() {
+    socketClient.emitEvent('createMessage', {
+      sender: '67a524378b46ee082a70dfb2',
+      receiver: '67a524b28b46ee082a70dfb6',
+      text: newMessage.value,
+    })
+  }
+
+  function findAllMessages() {
+    socketClient.emitEvent('findAllMessages')
+    socketClient.subscribeEvent('messagesList', (data) => console.log(data))
+  }
+  
+
+  onMounted(() => {
+    socketClient.connect('messages')
+    findAllMessages()
+  })
 </script>
 
 <style scoped>

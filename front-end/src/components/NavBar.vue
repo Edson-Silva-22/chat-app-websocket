@@ -9,7 +9,7 @@
         <v-list-item 
           v-for="(item, index) in itemsMenu"
           :value="item.value"
-          active-color="blue"
+          color="blue"
           :key="index"
           @click="emits('definePageTitle', item.title)"
           :to="item.route"
