@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/user';
 import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UsersService {
@@ -12,13 +13,22 @@ export class UsersService {
   ){}
   async create(createUserDto: CreateUserDto) {
     try {
-      const userExists = await this.userModel.find({name: createUserDto.name})
+      const findUser = await this.userModel.find({email: createUserDto.email});
+      const findUserNickname = await this.userModel.find({nickname: createUserDto.nickname});
 
-      if (userExists.length > 0) throw new BadRequestException('Usuário já existe.');
+      if (findUser.length > 0) throw new BadRequestException('Usuário já existe.');
+      if (findUserNickname.length > 0) throw new BadRequestException('Nickname já existe.');
 
-      const createUsre = await this.userModel.create(createUserDto)
+      const hashingPassword = await bcrypt.hash(createUserDto.password, 10)
 
-      return createUsre;
+      const createUser = await this.userModel.create({
+        name: createUserDto.name,
+        email: createUserDto.email,
+        password: hashingPassword,
+        nickname: createUserDto.nickname,
+      })
+
+      return await createUser.save();
     
     } catch (error) {
       console.error(error)
@@ -29,7 +39,7 @@ export class UsersService {
 
   async findAll() {
     try {
-      const findUser = await this.userModel.find()
+      const findUser = await this.userModel.find().select('-password')
 
       return findUser;
     } catch (error) {
