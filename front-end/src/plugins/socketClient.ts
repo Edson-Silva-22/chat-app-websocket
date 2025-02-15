@@ -4,21 +4,19 @@ class SocketClient {
   private socket: Socket | null = null;
 
   connect(namespace: string): void {
-    if (!this.socket) {
-      this.socket = io(`http://localhost:3000/${namespace}`);
-
-      this.socket.on('connect', () => {
-        console.log('Conectado ao WebSocket');
-      });
-
-      this.socket.on('disconnect', () => {
-        console.log('Desconectado do WebSocket');
-      });
-    }
+    this.socket = io(`http://localhost:3000/${namespace}`);
   }
   
   subscribeEvent(eventName: string, callback: (data: any) => void) {
     this.socket?.on(eventName, callback);
+  }
+
+  unsubscribeEvent(eventName: string): void {
+    this.socket?.off(eventName);
+  }
+
+  unsubscribeAllEvents(): void {
+    this.socket?.removeAllListeners();
   }
   
   emitEvent(eventName: string, data?: any): void {

@@ -32,10 +32,24 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     this.logger.log(`Client desconectado: ${client.id}`);
   }
 
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(client: Socket, room: string) {
+    //O usuário entra em uma sala criada com o nome do seu proprio id
+    client.join(room);
+    console.log('usuário entrou na sala')
+  }
+
   @SubscribeMessage('createMessage')
   async create(@MessageBody() createMessageDto: CreateMessageDto) {
-    await this.messagesService.create(createMessageDto);
-    await this.findAll()
+    const result = await this.messagesService.create(createMessageDto);
+
+    if (result) {
+      //Envia a mensagem para a sala cujo o nome é o id do usuário que enviou a mensagem
+      this.server.to(createMessageDto.sender).emit('sendNewMessage', result)
+      
+      //Envia a mensagem para a sala cujo o nome é o id do usuário que irá receber a mensagem
+      this.server.to(createMessageDto.receiver).emit('receiveNewMessage', result)
+    }
   }
 
   @SubscribeMessage('findAllMessages')

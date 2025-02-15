@@ -90,7 +90,6 @@ import Alert from '@/components/Alert.vue';
     loading.value = true
     await sleep(2000)
     const response = await authStore.login(values)
-    console.log(response)
     if (response) {
       loading.value = false
       router.push('/')
