@@ -47,6 +47,7 @@
   width: 80%;
   height: calc(100vh - 128px);
   position: relative;
+  background-color: #050911;
 }
 
 .messagesHeader{
@@ -57,6 +58,7 @@
   gap: 10px;
   position: fixed;
   width: 100%;
+  background-color: #0c1323;
 }
 
 .messagesBody{
@@ -68,8 +70,8 @@
   overflow-y: scroll;
 }
 
-.messageSend{
-  background-color: #212121;
+.messageReceived{
+  background-color: #111a31;
   padding: 15px 10px;
   border-radius: 10px;
   display: flex;
@@ -87,8 +89,8 @@
   right: 10px;
 }
 
-.messageReceived{
-  background-color: #2195f3f1;
+.messageSend{
+  background-color: rgb(var(--v-theme-success));
   padding: 10px;
   border-radius: 10px;
   display: flex;
@@ -107,4 +109,5 @@
   width: 100%;
   bottom: 0;
   max-width: 700px;
+  background-color: #0c1323;
 }

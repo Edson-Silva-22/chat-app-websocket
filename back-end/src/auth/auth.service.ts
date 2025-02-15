@@ -31,13 +31,14 @@ export class AuthService {
 
       const payload = { sub: findUser[0].id, username: findUser[0].name };
 
+      //O método signAsync gera o token de acordo com payload do user
       return {
-        //O método signAsync gera o token de acordo com payload do user
-        result: await this.jwtService.signAsync(payload),
-        status: 200,
+        token: await this.jwtService.signAsync(payload)
       }
+
     } catch (error) {
       console.error(error)
+      if (error instanceof BadRequestException) throw error
       throw new InternalServerErrorException('Ocorreu um erro ao tentar fazer login')
     }
   }
@@ -52,22 +53,16 @@ export class AuthService {
         const findUser = await this.userModel.find({_id: validateToken.sub}).select('-password')
 
         return {
-          result: {
-            user: findUser[0],
-            valid: true
-          },
-          status: 200
+          user: findUser[0],
+          valid: true
         }
       }
 
     } catch (error) {
       console.error(error)
       return {
-        result: {
-          valid: false,
-          user: {}
-        },
-        status: 200
+        valid: false,
+        user: {}
       }
     }
   }

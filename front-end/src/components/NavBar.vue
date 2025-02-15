@@ -3,13 +3,15 @@
     permanent 
     rail
     location="bottom"
+    color="#080c16"
+    class="border-0"
   >
     <v-list height="64" class="pa-0">
       <div class="d-flex justify-center">
         <v-list-item 
           v-for="(item, index) in itemsMenu"
           :value="item.value"
-          color="blue"
+          color="success"
           :key="index"
           @click="emits('definePageTitle', item.title)"
           :to="item.route"
@@ -29,13 +31,12 @@ import { ref } from 'vue';
 import { useDisplay } from 'vuetify'
 
   const emits = defineEmits(['definePageTitle'])
-  const display = useDisplay();
   const itemsMenu = ref([
     {
       icon:'mdi-view-dashboard',
       title: 'Publicações',
       value: 'publications',
-      route: '/publications'
+      route: '/'
     },
 
     {
