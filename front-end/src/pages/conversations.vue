@@ -5,7 +5,8 @@
         <v-list-item 
           height="70" 
           value="1"
-          color="blue"
+          color="success"
+          style="background-color: #0c1323;"
         >
           <div class="d-flex ga-3">
             <div class="avatar">
@@ -20,7 +21,7 @@
             </div>
   
             <div class="notification">
-              <p class="bg-blue">2</p>
+              <p class="bg-success">2</p>
               <v-list-item-subtitle>10:45</v-list-item-subtitle>
             </div>
           </div>
@@ -30,77 +31,46 @@
     </div>
   
     <div class="divMessages">
-      <div class="messagesHeader bg-blue">
+      <div class="messagesHeader">
         <v-avatar
           image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
         ></v-avatar>
 
         <div>
           <h3>Alex</h3>
-          <p class="">Online</p>
+          <p class="text-success">Online</p>
         </div>
       </div>
 
       <div class="messagesBody">
-        <div class="messageSend mb-5">
-          <p>Olá, tudo bem?</p>
+        <div 
+          v-for="(message, index) in messagesList"
+          :class="authStore.userAuth?._id == message.sender ? 'messageSend' :  'messageReceived'"
+          :key="index"
+        >
+          <p>{{ message.text }}</p>
           <p class="messageTime">10:45</p>
-        </div>
-
-        <div class="messageReceived">
-          <p>Como você está?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Debitis dolor ducimus unde illo beatae nisi aspernatur, totam pariatur, commodi eligendi dolorum dolores. Commodi quae soluta</p>
-          <p class="messageTime">10:46</p>
-        </div>
-
-        <div class="messageSend">
-          <p>To ligado</p>
-          <p class="messageTime">10:48</p>
-        </div>
-
-        <div class="messageSend mb-5">
-          <p>Olá, tudo bem?</p>
-          <p class="messageTime">10:45</p>
-        </div>
-
-        <div class="messageReceived">
-          <p>Como você está?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Debitis dolor ducimus unde illo beatae nisi aspernatur, totam pariatur, commodi eligendi dolorum dolores. Commodi quae soluta</p>
-          <p class="messageTime">10:46</p>
-        </div>
-
-        <div class="messageSend">
-          <p>To ligado</p>
-          <p class="messageTime">10:48</p>
-        </div>
-
-        <div class="messageSend mb-5">
-          <p>Olá, tudo bem?</p>
-          <p class="messageTime">10:45</p>
-        </div>
-
-        <div class="messageReceived">
-          <p>Como você está?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Debitis dolor ducimus unde illo beatae nisi aspernatur, totam pariatur, commodi eligendi dolorum dolores. Commodi quae soluta</p>
-          <p class="messageTime">10:46</p>
-        </div>
-
-        <div class="messageSend">
-          <p>To ligado</p>
-          <p class="messageTime">10:48</p>
         </div>
       </div>
 
       <div class="d-flex justify-center">
         <div class="messagesFooter">
-          <v-text-field
+          <v-textarea
             name="name"
             placeholder="Mesagem"
             variant="solo"
             rounded
             hide-details
             v-model="newMessage"
-          ></v-text-field>
+            bg-color="#111a31"
+            auto-grow
+            rows="1"
+            max-rows="3"
+            clearable
+          ></v-textarea>
   
           <v-btn 
-            color="blue" 
+            color="success" 
             icon="mdi-send"
             width="56"
             height="56"
@@ -115,26 +85,46 @@
 
 <script lang="ts" setup>
   import socketClient from '@/plugins/socketClient';
+  import { useAuthStore } from '@/stores/auth';
 
+  const authStore = useAuthStore();
   const newMessage = ref<string>('')
+  const messagesList = ref<{
+    _id: string;
+    sender: string;
+    receiver: string;
+    text: string;
+    createdAt: Date;
+  }[]>()
 
   function sendMessage() {
     socketClient.emitEvent('createMessage', {
-      sender: '67a524378b46ee082a70dfb2',
+      sender: authStore.userAuth._id,
       receiver: '67a524b28b46ee082a70dfb6',
       text: newMessage.value,
     })
+
+    newMessage.value = ''
   }
 
-  function findAllMessages() {
-    socketClient.emitEvent('findAllMessages')
-    socketClient.subscribeEvent('messagesList', (data) => console.log(data))
+  // Função para atualizar a lista de mensagens
+  function setMessagesList(data: typeof messagesList.value) {
+    messagesList.value = data
+    console.log(messagesList.value)
   }
   
-
-  onMounted(() => {
+  onMounted(async () => {
+    // Conectando-se ao socket com o namespace messages
     socketClient.connect('messages')
-    findAllMessages()
+    // Emitindo um evento para buscar todas as mensagens
+    socketClient.emitEvent('findAllMessages')
+    // Subscrevendo o evento de retorno de todas as mensagens para atualizar a lista de mensagens
+    socketClient.subscribeEvent('messagesList', setMessagesList)
+  })
+
+  onUnmounted(() => {
+    socketClient.disconnect()
+    // socketClient.unsubscribeEvent('messagesList')
   })
 </script>
 
