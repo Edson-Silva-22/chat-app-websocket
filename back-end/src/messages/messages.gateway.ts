@@ -58,18 +58,18 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     this.server.emit('messagesList', response);
   }
 
-  @SubscribeMessage('findOneMessage')
-  findOne(@MessageBody() id: number) {
-    return this.messagesService.findOne(id);
-  }
+  // @SubscribeMessage('findOneMessage')
+  // findOne(@MessageBody() id: number) {
+  //   return this.messagesService.findOne(id);
+  // }
 
-  @SubscribeMessage('updateMessage')
-  update(@MessageBody() updateMessageDto: UpdateMessageDto) {
-    return this.messagesService.update(updateMessageDto.id, updateMessageDto);
-  }
+  // @SubscribeMessage('updateMessage')
+  // update(@MessageBody() updateMessageDto: UpdateMessageDto) {
+  //   return this.messagesService.update(updateMessageDto.id, updateMessageDto);
+  // }
 
-  @SubscribeMessage('removeMessage')
-  remove(@MessageBody() id: number) {
-    return this.messagesService.remove(id);
-  }
+  // @SubscribeMessage('removeMessage')
+  // remove(@MessageBody() id: number) {
+  //   return this.messagesService.remove(id);
+  // }
 }

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 @Schema({
   timestamps: true,
@@ -26,6 +26,12 @@ export class Message {
     required: false,
   })
   file: string
+
+  @Prop()
+  createdAt?: Date
+
+  @Prop()
+  updatedAt?: Date
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)

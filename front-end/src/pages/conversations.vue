@@ -49,7 +49,7 @@
           :key="index"
         >
           <p>{{ message.text }}</p>
-          <p class="messageTime">10:45</p>
+          <p class="messageTime">{{ message.createdAt }}</p>
         </div>
       </div>
 
@@ -90,13 +90,15 @@
 <script lang="ts" setup>
   import socketClient from '@/plugins/socketClient';
   import { useAuthStore } from '@/stores/auth';
+  import { format } from 'date-fns-tz'
 
   export interface Message {
     _id: string;
     sender: string;
     receiver: string;
     text: string;
-    createdAt: Date;
+    createdAt: string;
+    updatedAt: string;
   }
 
   const authStore = useAuthStore();
@@ -116,9 +118,37 @@
 
   // Função para atualizar a lista de mensagens
   function setMessagesList(data: Message[] | Message) {
-    if (Array.isArray(data) && data?.length > 0) messagesList.value = data
 
-    else if (!Array.isArray(data)) messagesList.value.push(data)
+    // Quando todas as mensagens são carregadas
+    if (Array.isArray(data) && data?.length > 0) {
+      data.map((item: Message) => {
+        console.log(item.createdAt)
+        // Formatar a data para mostrar na tela (HH:mm)
+        const formatDataCreatedAt = new Date(item.createdAt)
+        const formatDataUpdate = new Date(item.updatedAt)
+        
+        messagesList.value.push({
+          _id: item._id,
+          sender: item.sender,
+          receiver: item.receiver,
+          text: item.text,
+          createdAt: `${formatDataCreatedAt.getHours()}:${formatDataCreatedAt.getMinutes()}`,
+          updatedAt: `${formatDataUpdate.getHours()}:${formatDataUpdate.getMinutes()}`
+        })
+      })
+    }
+
+    // Quando uma nova mensagem é enviada
+    else if (!Array.isArray(data)) {
+      messagesList.value.push({
+        _id: data._id,
+        sender: data.sender,
+        receiver: data.receiver,
+        text: data.text,
+        createdAt: format(new Date(data.createdAt), 'HH:mm'),
+        updatedAt: format(new Date(data.updatedAt), 'HH:mm')
+      })
+    }
   }
   
   onMounted(async () => {
