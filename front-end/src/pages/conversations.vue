@@ -1,12 +1,13 @@
 <template>
   <div class="d-flex">
     <div class="divConversation">
-      <v-list v-for="item in [1,2,3,4,5,6,7,8,9,10,11,12,13]" class="pa-0">
+      <v-list v-for="(contact, index) in contacts" class="pa-0">
         <v-list-item 
-          height="70" 
-          value="1"
+          height="80" 
+          :value="contact.contactId._id"
           color="success"
           style="background-color: #0c1323;"
+          :key="contact.contactId._id"
         >
           <div class="d-flex ga-3">
             <div class="avatar">
@@ -16,8 +17,8 @@
             </div>
   
             <div class="messagePreview">
-              <v-list-item-title>Alex</v-list-item-title>
-              <p>E ai tudo bem?</p>
+              <v-list-item-title>{{ contact.contactId.name }}</v-list-item-title>
+              <p>{{ contact.lastMessage }}</p>
             </div>
   
             <div class="notification">
@@ -61,7 +62,7 @@
           ></v-text-field>
           <v-textarea
             name="name"
-            placeholder="Mesagem"
+            placeholder="Mensagem"
             variant="solo"
             rounded
             hide-details
@@ -90,6 +91,7 @@
 <script lang="ts" setup>
   import socketClient from '@/plugins/socketClient';
   import { useAuthStore } from '@/stores/auth';
+  import { useContactStore } from '@/stores/contact';
   import { format } from 'date-fns-tz'
 
   export interface Message {
@@ -101,10 +103,26 @@
     updatedAt: string;
   }
 
+  export interface Contact {
+    _id: string;
+    userId: {
+      _id: string;
+      name: string;
+    };
+    contactId: {
+      _id: string;
+      name: string;
+    }
+    lastMessage?: string;
+    lastMessageTime?: string;
+  }
+
   const authStore = useAuthStore();
+  const contactStore = useContactStore();
   const newMessage = ref<string>('')
   const messagesList = ref<Message[]>([])
   const reactiveId = ref('')
+  const contacts = ref<Contact[]>([])
 
   function sendMessage() {
     socketClient.emitEvent('createMessage', {
@@ -122,7 +140,6 @@
     // Quando todas as mensagens são carregadas
     if (Array.isArray(data) && data?.length > 0) {
       data.map((item: Message) => {
-        console.log(item.createdAt)
         // Formatar a data para mostrar na tela (HH:mm)
         const formatDataCreatedAt = new Date(item.createdAt)
         const formatDataUpdate = new Date(item.updatedAt)
@@ -132,8 +149,8 @@
           sender: item.sender,
           receiver: item.receiver,
           text: item.text,
-          createdAt: `${formatDataCreatedAt.getHours()}:${formatDataCreatedAt.getMinutes()}`,
-          updatedAt: `${formatDataUpdate.getHours()}:${formatDataUpdate.getMinutes()}`
+          createdAt: `${formatDataCreatedAt.getHours()}:${formatDataCreatedAt.getMinutes() < 10 ? formatDataCreatedAt.getMinutes() + '0' : formatDataCreatedAt.getMinutes()}`,
+          updatedAt: `${formatDataUpdate.getHours()}:${formatDataUpdate.getMinutes() < 10 ? formatDataUpdate.getMinutes() + '0' : formatDataUpdate.getMinutes()}`
         })
       })
     }
@@ -155,20 +172,22 @@
     // Conectando-se ao socket com o namespace messages
     socketClient.connect('messages')
 
+    // Emitindo evento para que o usuário entre na sua sala individual
+    socketClient.emitEvent('joinRoom', authStore.userAuth._id)
+
     // Emitindo um evento para buscar todas as mensagens
-    socketClient.emitEvent('findAllMessages')
+    socketClient.emitEvent('findAllMessages', authStore.userAuth._id)
 
     // Subscrevendo o evento de retorno de todas as mensagens para atualizar a lista de mensagens
     socketClient.subscribeEvent('messagesList', setMessagesList)
-
-    // Emitindo evento para que o usuário entre na sua sala individual
-    socketClient.emitEvent('joinRoom', authStore.userAuth._id)
 
     // Emitindo evento para buscar a nova message enviada pelo usuário
     socketClient.subscribeEvent('sendNewMessage', setMessagesList)
 
     // Emitindo evento para buscar as mensagens da sala individual do usuário
     socketClient.subscribeEvent('receiveNewMessage', setMessagesList)
+
+    contacts.value = await contactStore.findAll(authStore.userAuth._id)
   })
 
   onUnmounted(() => {

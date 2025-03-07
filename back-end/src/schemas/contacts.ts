@@ -1,4 +1,4 @@
-import { Prop, Schema } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose from "mongoose";
 
 @Schema({timestamps: true})
@@ -15,9 +15,21 @@ export class Contacts {
   })
   contactId: string;
 
-  @Prop()
-  lastMessage: string;
+  @Prop({
+    required: false,
+  })
+  lastMessage?: string;
+
+  @Prop({
+    required: false,
+  })
+  lastMessageTime?: Date;
 
   @Prop()
-  lastMessageTime: Date;
+  createdAt?: Date
+
+  @Prop()
+  updatedAt?: Date
 }
+
+export const ContactsSchema = SchemaFactory.createForClass(Contacts)

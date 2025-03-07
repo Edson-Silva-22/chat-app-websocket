@@ -53,9 +53,9 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   }
 
   @SubscribeMessage('findAllMessages')
-  async findAll() {
+  async findAll(@MessageBody() userId: string) {
     const response = await this.messagesService.findAll();
-    this.server.emit('messagesList', response);
+    this.server.to(userId).emit('messagesList', response);
   }
 
   // @SubscribeMessage('findOneMessage')
