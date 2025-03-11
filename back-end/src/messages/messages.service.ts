@@ -10,7 +10,6 @@ import { Contacts } from 'src/schemas/contacts';
 export class MessagesService {
   constructor(
     @InjectModel(Message.name) private readonly messageModel: Model<Message>,
-    @InjectModel(Contacts.name) private readonly contactsModel: Model<Contacts>
   ){}
   async create(createMessageDto: CreateMessageDto) {
     const createdMessage = await this.messageModel.create(createMessageDto)
@@ -33,8 +32,15 @@ export class MessagesService {
     };
   }
 
-  async findAll() {
-    const findAllMessages = await this.messageModel.find();
+  async findAll(userId: string, contactId: string) {
+    // Buscando as mensagens entre o usuário e o contato
+    const findAllMessages = await this.messageModel.find({
+      $or: [
+        { sender: userId, receiver: contactId },
+        { sender: contactId, receiver: userId }
+      ]
+    }).exec();    
+
     return findAllMessages;
   }
 }

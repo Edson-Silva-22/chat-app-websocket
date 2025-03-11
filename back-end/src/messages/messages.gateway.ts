@@ -36,7 +36,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   handleJoinRoom(client: Socket, room: string) {
     //O usuário entra em uma sala criada com o nome do seu proprio id
     client.join(room);
-    console.log('usuário entrou na sala')
+    console.log('usuário entrou na sala ' + room)
   }
 
   @SubscribeMessage('createMessage')
@@ -53,9 +53,9 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   }
 
   @SubscribeMessage('findAllMessages')
-  async findAll(@MessageBody() userId: string) {
-    const response = await this.messagesService.findAll();
-    this.server.to(userId).emit('messagesList', response);
+  async findAll(@MessageBody() data: any) {
+    const response = await this.messagesService.findAll(data.userId, data.contactId);
+    this.server.to(data.userId).emit('messagesList', response);
   }
 
   // @SubscribeMessage('findOneMessage')

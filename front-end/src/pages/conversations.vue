@@ -1,13 +1,16 @@
 <template>
   <div class="d-flex">
     <div class="divConversation">
-      <v-list v-for="(contact, index) in contacts" class="pa-0">
+      <v-list class="pa-0">
         <v-list-item 
+          v-for="(contact, index) in contacts"
           height="80" 
           :value="contact.contactId._id"
           color="success"
           style="background-color: #0c1323;"
           :key="contact.contactId._id"
+          :active="selectedContact?.contactId === contact.contactId"
+          @click="selectedContact = contact; findAllMessages()"
         >
           <div class="d-flex ga-3">
             <div class="avatar">
@@ -18,12 +21,12 @@
   
             <div class="messagePreview">
               <v-list-item-title>{{ contact.contactId.name }}</v-list-item-title>
-              <p>{{ contact.lastMessage }}</p>
+               <p>ultima mensagem</p>
             </div>
   
             <div class="notification">
               <p class="bg-success">2</p>
-              <v-list-item-subtitle>10:45</v-list-item-subtitle>
+              <v-list-item-subtitle style="font-size: 12px;">10:45</v-list-item-subtitle>
             </div>
           </div>
   
@@ -31,19 +34,19 @@
       </v-list>
     </div>
   
-    <div class="divMessages">
+    <div v-if="selectedContact" class="divMessages">
       <div class="messagesHeader">
         <v-avatar
           image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
         ></v-avatar>
 
         <div>
-          <h3>Alex</h3>
+          <h3>{{ selectedContact?.contactId.name }}</h3>
           <p class="text-success">Online</p>
         </div>
       </div>
 
-      <div class="messagesBody">
+      <div v-if="messagesList.length > 0" class="messagesBody">
         <div 
           v-for="(message, index) in messagesList"
           :class="authStore.userAuth?._id == message.sender ? 'messageSend' :  'messageReceived'"
@@ -54,12 +57,13 @@
         </div>
       </div>
 
+      <div v-else class="messagesBody d-flex flex-column justify-center align-center">
+        <v-icon icon="mdi-message-minus" size="64" color="#BDBDBD"></v-icon>
+        <p style="color: #BDBDBD;">Nenhuma mensagem</p>
+      </div>
+
       <div class="d-flex justify-center">
         <div class="messagesFooter">
-          <v-text-field
-            label="receiverId"
-            v-model="reactiveId"
-          ></v-text-field>
           <v-textarea
             name="name"
             placeholder="Mensagem"
@@ -84,6 +88,11 @@
         </div>
       </div>
 
+    </div>
+
+    <div v-else class="divMessages d-flex flex-column justify-center align-center">
+      <v-icon icon="mdi-message-text" size="64" color="#BDBDBD"></v-icon>
+      <p style="color: #BDBDBD;">Área de Mensagens</p>
     </div>
   </div>
 </template>
@@ -121,24 +130,33 @@
   const contactStore = useContactStore();
   const newMessage = ref<string>('')
   const messagesList = ref<Message[]>([])
-  const reactiveId = ref('')
   const contacts = ref<Contact[]>([])
+  const selectedContact = ref<Contact>()
 
   function sendMessage() {
     socketClient.emitEvent('createMessage', {
       sender: authStore.userAuth._id,
-      receiver: reactiveId.value,
+      receiver: selectedContact.value?.contactId._id,
       text: newMessage.value,
     })
 
     newMessage.value = ''
   }
 
+  function findAllMessages() {
+    // Emitindo um evento para buscar todas as mensagens
+    socketClient.emitEvent('findAllMessages', {
+      userId: authStore.userAuth._id,
+      contactId: selectedContact.value?.contactId._id,
+    })
+  }
+
   // Função para atualizar a lista de mensagens
   function setMessagesList(data: Message[] | Message) {
-
+    
     // Quando todas as mensagens são carregadas
     if (Array.isArray(data) && data?.length > 0) {
+      messagesList.value = []
       data.map((item: Message) => {
         // Formatar a data para mostrar na tela (HH:mm)
         const formatDataCreatedAt = new Date(item.createdAt)
@@ -176,7 +194,7 @@
     socketClient.emitEvent('joinRoom', authStore.userAuth._id)
 
     // Emitindo um evento para buscar todas as mensagens
-    socketClient.emitEvent('findAllMessages', authStore.userAuth._id)
+    //socketClient.emitEvent('findAllMessages', authStore.userAuth._id)
 
     // Subscrevendo o evento de retorno de todas as mensagens para atualizar a lista de mensagens
     socketClient.subscribeEvent('messagesList', setMessagesList)
