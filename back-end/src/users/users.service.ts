@@ -48,15 +48,49 @@ export class UsersService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    try {
+      const findUser = await this.userModel.find({ _id: id}).select('-password')
+
+      if (findUser.length === 0) throw new BadRequestException('Usuário não encontrado.');
+
+      return findUser[0];
+    } catch (error) {
+      console.error(error)
+      if (error instanceof BadRequestException) throw error
+      throw new InternalServerErrorException('Devido a um erro interno não foi possível buscar os dados.')
+    }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      const findUser = await this.userModel.find({ _id: id });
+
+      if (findUser.length === 0) throw new BadRequestException('Usuário não encontrado.');
+
+      const updateUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).select('-password')
+
+      return updateUser;
+    } catch (error) {
+      console.error(error)
+      if (error instanceof BadRequestException) throw error
+      throw new InternalServerErrorException('Devido a um erro interno não foi possível atualizar os dados.')
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    try {
+      const findUser = await this.userModel.find({ _id: id });
+
+      if (findUser.length === 0) throw new BadRequestException('Usuário não encontrado.');
+
+      await this.userModel.findByIdAndDelete(id);
+
+      return 'Usuário removido.';
+    } catch (error) {
+      console.error(error)
+      if (error instanceof BadRequestException) throw error
+      throw new InternalServerErrorException('Devido a um erro interno não foi possível remover o usuário.')
+    }
   }
 }

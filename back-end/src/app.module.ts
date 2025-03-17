@@ -8,6 +8,5 @@ import { ContactsModule } from './contacts/contacts.module';
 @Module({
   imports: [MongooseModule.forRoot('mongodb://localhost/chat-app'), UsersModule, MessagesModule, AuthModule, ContactsModule],
   controllers: [],
-  providers: [],
 })
 export class AppModule {}

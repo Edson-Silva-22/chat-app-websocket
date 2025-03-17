@@ -8,28 +8,13 @@ import { Request } from 'express';
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
-  @Post()
-  async create(@Body() createContactDto: CreateContactDto) {
-    return await this.contactsService.create(createContactDto);
-  }
-
   @Get()
-  async findAll(@Req() request: Request) {
-    return await this.contactsService.findAll(request);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.contactsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto) {
-    return this.contactsService.update(+id, updateContactDto);
+  async findAllMyContacts(@Req() request: Request) {
+    return await this.contactsService.findAllMyContacts(request);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contactsService.remove(+id);
+  async removeContact(@Param('id') id: string) {
+    return this.contactsService.removeContact(+id);
   }
 }

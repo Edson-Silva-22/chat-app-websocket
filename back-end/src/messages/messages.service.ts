@@ -10,11 +10,26 @@ import { Contacts } from 'src/schemas/contacts';
 export class MessagesService {
   constructor(
     @InjectModel(Message.name) private readonly messageModel: Model<Message>,
+    @InjectModel(Contacts.name) private readonly contactsModel: Model<Contacts>
   ){}
   async create(createMessageDto: CreateMessageDto) {
     const createdMessage = await this.messageModel.create(createMessageDto)
+
+    // Atualizando a ultima mensagem enviada entre os contatos e sua data de envio
+    await this.contactsModel.updateMany(
+      {
+        $or: [
+          { userId: createMessageDto.sender, contactId: createMessageDto.receiver },
+          { userId: createMessageDto.receiver, contactId: createMessageDto.sender },
+        ]
+      },
+      {
+        lastMessage: createMessageDto.text,
+        lastMessageTime: createdMessage.createdAt,
+      }
+    )
     
-    // Salvando data como fromato e timezone
+    // Retornando data como fromato e timezone
     const dateInTimezone = {
       createdAt: format(createdMessage.createdAt, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Sao_Paulo'}),
       updatedAt: format(createdMessage.updatedAt, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Sao_Paulo'}),

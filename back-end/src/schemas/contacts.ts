@@ -25,6 +25,11 @@ export class Contacts {
   })
   lastMessageTime?: Date;
 
+  @Prop({
+    required: true,
+  })
+  status: "established" | "refused" | "waiting";
+
   @Prop()
   createdAt?: Date
 

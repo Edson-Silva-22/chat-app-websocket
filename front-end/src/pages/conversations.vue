@@ -21,7 +21,7 @@
   
             <div class="messagePreview">
               <v-list-item-title>{{ contact.contactId.name }}</v-list-item-title>
-               <p>ultima mensagem</p>
+               <p>{{ contact.lastMessage }}</p>
             </div>
   
             <div class="notification">
@@ -206,6 +206,7 @@
     socketClient.subscribeEvent('receiveNewMessage', setMessagesList)
 
     contacts.value = await contactStore.findAll(authStore.userAuth._id)
+    console.log(contacts.value)
   })
 
   onUnmounted(() => {
