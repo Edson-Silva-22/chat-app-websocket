@@ -26,7 +26,7 @@
   
             <div class="notification">
               <p class="bg-success">2</p>
-              <v-list-item-subtitle style="font-size: 12px;">10:45</v-list-item-subtitle>
+              <v-list-item-subtitle style="font-size: 12px;">{{ contact.lastMessageTime }}</v-list-item-subtitle>
             </div>
           </div>
   
@@ -185,6 +185,14 @@
       })
     }
   }
+
+  async function findMyContacts() {
+    const response = await contactStore.findAll(authStore.userAuth._id)
+    contacts.value = response.map((contact: Contact) => ({
+     ...contact,
+      lastMessageTime: format(new Date(response[0].lastMessageTime), 'HH:mm'),
+    }))
+  }
   
   onMounted(async () => {
     // Conectando-se ao socket com o namespace messages
@@ -205,8 +213,8 @@
     // Emitindo evento para buscar as mensagens da sala individual do usuário
     socketClient.subscribeEvent('receiveNewMessage', setMessagesList)
 
-    contacts.value = await contactStore.findAll(authStore.userAuth._id)
-    console.log(contacts.value)
+    // Buscando os contatos do usuário
+    await findMyContacts()
   })
 
   onUnmounted(() => {

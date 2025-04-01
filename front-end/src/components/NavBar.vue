@@ -13,7 +13,8 @@
           :value="item.value"
           color="success"
           :key="index"
-          @click="emits('definePageTitle', item.title)"
+          :active="selectedItemMenu == item.value"
+          @click="emits('definePageTitle', item.title); selectedItemMenu = item.value"
           :to="item.route"
           height="64"
           width="100"
@@ -53,6 +54,7 @@ import { useDisplay } from 'vuetify'
       route: '/contacts'
     },
   ])
+  const selectedItemMenu = ref<string>('publications')
 </script>
 
 <style scoped>

@@ -15,6 +15,12 @@ export class MessagesService {
   async create(createMessageDto: CreateMessageDto) {
     const createdMessage = await this.messageModel.create(createMessageDto)
 
+    // Retornando data como fromato e timezone
+    const dateInTimezone = {
+      createdAt: format(createdMessage.createdAt, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Sao_Paulo'}),
+      updatedAt: format(createdMessage.updatedAt, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Sao_Paulo'}),
+    }
+    
     // Atualizando a ultima mensagem enviada entre os contatos e sua data de envio
     await this.contactsModel.updateMany(
       {
@@ -25,16 +31,9 @@ export class MessagesService {
       },
       {
         lastMessage: createMessageDto.text,
-        lastMessageTime: createdMessage.createdAt,
+        lastMessageTime: dateInTimezone.createdAt,
       }
     )
-    
-    // Retornando data como fromato e timezone
-    const dateInTimezone = {
-      createdAt: format(createdMessage.createdAt, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Sao_Paulo'}),
-      updatedAt: format(createdMessage.updatedAt, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Sao_Paulo'}),
-    }
-
 
     return {
       _id: createdMessage._id,
