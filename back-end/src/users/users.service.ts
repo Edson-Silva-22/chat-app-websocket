@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/user';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt'
+import { Request } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -37,11 +38,18 @@ export class UsersService {
     }
   }
 
-  async findAll() {
+  async findAll(request: Request) {
     try {
-      const findUser = await this.userModel.find().select('-password')
+      const findUsers = this.userModel.find().select('-password')
 
-      return findUser;
+      if (request.query.contactName) {
+        findUsers.find().or([
+          { name: { $regex: request.query.contactName, $options: 'i' } },
+          { nickname: { $regex: request.query.contactName, $options: 'i' } }
+        ])
+      }
+
+      return await findUsers.exec();
     } catch (error) {
       console.error(error)
       throw new InternalServerErrorException('Devido a um erro interno não foi possível buscar os dados.')

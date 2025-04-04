@@ -13,6 +13,11 @@ export class ContactsController {
     return await this.contactsService.findAllMyContacts(request);
   }
 
+  @Get('/contactsRequest')
+  async findMyContactsRequests(@Req() request: Request){
+    return await this.contactsService.findMyContactsRequests(request);
+  }
+
   @Delete(':id')
   async removeContact(@Param('id') id: string) {
     return this.contactsService.removeContact(+id);

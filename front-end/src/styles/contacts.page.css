@@ -17,6 +17,13 @@
   max-width: 400px;
 }
 
+.progress-circular{
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .contact {
   margin-bottom: 20px;
   background-color: #0c1323;
@@ -28,7 +35,7 @@
   background-color: #131a2b;
 }
 
-.contact > p {
+.secondaryText {
   color: #264594;
   font-size: 16px;
   margin-bottom: 10px;
@@ -47,7 +54,6 @@
   margin-top: 10px;
   justify-content: right;
 }
-
 
 .dialogContent{
   width: 100%;
@@ -70,7 +76,7 @@
 }
 
 .dialogBody > p {
-  color: #BDBDBD;
+  color: #264594;
   font-size: 18px;
 }
 

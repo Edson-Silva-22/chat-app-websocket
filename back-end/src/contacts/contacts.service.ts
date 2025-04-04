@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Contacts } from 'src/schemas/contacts';
 import mongoose, { Model } from 'mongoose';
 import { Request } from 'express';
-import { format } from 'date-fns-tz'
 
 @Injectable()
 export class ContactsService {
@@ -70,7 +69,10 @@ export class ContactsService {
     try {
       const findAllMyContacts = this.contactsModel.aggregate([
         {
-          $match: { userId: new mongoose.Types.ObjectId(request.query.userId.toString()) }
+          $match: { 
+            userId: new mongoose.Types.ObjectId(request.query.userId.toString()),
+            status: 'established'
+          }
         },
         {
           $lookup: {
@@ -104,6 +106,22 @@ export class ContactsService {
       console.error(error);
       if (error instanceof BadRequestException) throw error
       throw new InternalServerErrorException('Devido ao um erro interno não foi possível listar os contatos.');
+    }
+  }
+
+  async findMyContactsRequests(resquest: Request) {
+    try {
+      const findContactRequest = await this.contactsModel.find({
+        status: "waiting",
+      })
+      .or([{ userId: resquest.query.userId }, { contactId: resquest.query.userId }])
+
+      return findContactRequest
+
+    } catch (error) {
+      console.error(error);
+      if (error instanceof BadRequestException) throw error
+      throw new InternalServerErrorException('Devido ao um erro interno não foi possível listar as solicitações de contato.');
     }
   }
 
