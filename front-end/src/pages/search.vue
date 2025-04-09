@@ -1,21 +1,9 @@
 <template>
   <v-app>
     <v-main class="v-main">
-      <v-tabs
-        v-model="tab"
-        color="success"
-        dark
-        slider-color="success"
-        height="64"
-      >
-        <v-tab value="one">Meus Contatos</v-tab>
-        <v-tab value="two">Contatos</v-tab>
-        <v-tab value="three">Solicitações</v-tab>
-      </v-tabs>
-
       <div class="text-field" v-if="tab != 'three'">
         <v-text-field
-          label="Buscar contato"
+          label="Buscar"
           variant="solo"
           bg-color="#111a31"
           clearable
@@ -23,6 +11,20 @@
           v-on:update:model-value="findAllContacts"
         ></v-text-field>
       </div>
+      
+      <v-tabs
+        v-model="tab"
+        color="success"
+        slider-color="success"
+        height="64"
+        class="mb-5 w-100"
+        show-arrows
+        align-tabs="center"
+      >
+          <v-tab value="one" class="tab">Meus Contatos</v-tab>
+          <v-tab value="two" class="tab">Contatos</v-tab>
+          <v-tab value="three" class="tab">Solicitações</v-tab>
+      </v-tabs>
 
       <v-tabs-window v-model="tab" class="tabWindow">
         <v-tabs-window-item value="one">
@@ -38,7 +40,7 @@
             class="contact" 
             v-for="(contact, index) in myContactsCache"
             v-if="myContacts.length > 0 && loading == false"
-            @click="myContactsDialogOpen.isOpen = !myContactsDialogOpen.isOpen; myContactsDialogOpen.contact = contact.contactId"
+            @click="contactsDialogOpen.isOpen = !contactsDialogOpen.isOpen; contactsDialogOpen.contact = contact.contactId; router.push(`/profile/${contact._id}`)"
             :key="index"
           >
             <div class="avatar">
@@ -58,6 +60,7 @@
                 color="red" 
                 variant="tonal" 
                 append-icon="mdi-delete"
+                class="text-subtitle-2"
               >Excluir contato</v-btn>
             </div>
           </div>
@@ -87,8 +90,8 @@
                 contactsDialogOpen.contact = contact
               }
               else{
-                myContactsDialogOpen.isOpen = !myContactsDialogOpen.isOpen 
-                myContactsDialogOpen.contact = contact
+                contactsDialogOpen.isOpen = !contactsDialogOpen.isOpen 
+                contactsDialogOpen.contact = contact
               }
             }"
             :key="index"
@@ -106,19 +109,45 @@
             </div>
 
             <div class="actions">
-              <v-btn 
+              <v-btn
+                class="text-subtitle-2" 
                 color="success" 
                 variant="tonal" 
                 append-icon="mdi-account-arrow-right"
-                v-if="contact.isContactSaved == false"
+                v-if="contact.isContactSaved == false && contact.isRequest == false"
               >Solicitar</v-btn>
 
-              <v-btn 
+              <v-btn
+                class="text-subtitle-2" 
                 color="red" 
                 variant="tonal" 
                 append-icon="mdi-delete"
-                v-else
+                v-if="contact.isContactSaved"
               >Excluir contato</v-btn>
+
+              <v-btn
+                class="text-subtitle-2" 
+                color="red" 
+                variant="tonal" 
+                append-icon="mdi-account-arrow-right"
+                v-if="authStore.userAuth._id == contact.senderId && contact.isRequest"
+              >Cancelar Solicitação</v-btn>
+
+              <v-btn
+                class="text-subtitle-2" 
+                v-if="authStore.userAuth._id != contact.senderId && contact.isRequest"              
+                color="success"
+                variant="tonal" 
+                append-icon="mdi-account-arrow-left"
+              >Aceitar</v-btn>
+
+              <v-btn
+                class="text-subtitle-2" 
+                v-if="authStore.userAuth._id != contact.senderId && contact.isRequest"              
+                color="red" 
+                variant="tonal" 
+                append-icon="mdi-account-cancel"
+              >Recusar</v-btn>
             </div>
           </div>
 
@@ -129,93 +158,63 @@
         </v-tabs-window-item>
 
         <v-tabs-window-item value="three">
-          <div 
-            class="contact" 
-            v-if="contactRequests.length > 0"
-          >
-            <p class="secondaryText">Solicitação Enviada</p>
-            <div class="avatar">
-              <v-avatar
-                image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
-                size="60"
-              ></v-avatar>
-              <p>Daniel Silva Santos</p>
-            </div>
-
-            <div class="actions">
-              <v-btn 
-                color="red" 
-                variant="tonal" 
-                append-icon="mdi-account-arrow-right"
-              >Cancelar Solicitação</v-btn>
-            </div>
+          <div v-if="loading" class="progress-circular">  
+            <v-progress-circular 
+              indeterminate 
+              color="success"
+              size="86"
+            ></v-progress-circular>
           </div>
 
           <div 
             class="contact" 
-            v-if="contactRequests.length > 0"
+            v-for="(contact, index) in contactRequests"
+            v-if="contactRequests.length > 0 && loading == false"
+            :key="index"
+            @click="contactsDialogOpen.isOpen = !contactsDialogOpen.isOpen; contactsDialogOpen.contact = contact.contactId"
           >
-            <p class="secondaryText">Solicitação Recebida</p>
+            <p class="secondaryText">{{ authStore.userAuth._id == contact.userId._id ? 'Solicitação Enviada' : 'Solicitação Recebida' }}</p>
             <div class="avatar">
               <v-avatar
                 image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
                 size="60"
               ></v-avatar>
-              <p>Carlos@2025</p>
+              <p>{{ authStore.userAuth._id == contact.userId._id ? contact.contactId.nickname : contact.userId.nickname }}</p>
             </div>
 
             <div class="actions">
               <v-btn 
+                v-if="authStore.userAuth._id == contact.userId._id"
+                color="red" 
+                variant="tonal" 
+                append-icon="mdi-account-arrow-right"
+                class="text-subtitle-2"
+              >Cancelar Solicitação</v-btn>
+
+              <v-btn 
+                v-if="authStore.userAuth._id == contact.contactId._id"              
                 color="success"
                 variant="tonal" 
                 append-icon="mdi-account-arrow-left"
+                class="text-subtitle-2"
               >Aceitar</v-btn>
 
               <v-btn 
+                v-if="authStore.userAuth._id == contact.contactId._id"              
                 color="red" 
                 variant="tonal" 
                 append-icon="mdi-account-cancel"
+                class="text-subtitle-2"
               >Recusar</v-btn>
             </div>
           </div>
 
-          <div v-else class="d-flex flex-column align-center">
+          <div v-if="contactRequests.length == 0 && loading == false" class="d-flex flex-column align-center">
             <v-icon icon="mdi-account-cancel" size="64" color="#BDBDBD"></v-icon>
             <p>Nenhum contato solicitado.</p>
           </div>
         </v-tabs-window-item>
       </v-tabs-window>
-
-      <v-dialog
-        v-model="myContactsDialogOpen.isOpen"
-        max-width="400px"
-        width="90%"
-      >
-        <div class="dialogContent">
-          <v-avatar
-            image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
-            size="200"
-          ></v-avatar>
-
-          <div class="dialogBody">
-            <h2>{{ myContactsDialogOpen.contact?.name }}</h2>
-            <p>{{ myContactsDialogOpen.contact?.email }}</p>
-            <p>{{ myContactsDialogOpen.contact?.nickname }}</p>
-          </div>
-
-          <div class="dialogActions">
-            <v-btn 
-              color="success" 
-              @click="myContactsDialogOpen.isOpen = false"
-              variant="tonal"
-            >Cancelar</v-btn>
-            <v-btn 
-              color="red" 
-              variant="tonal"
-            >Excluir Contato</v-btn>
-          </div>
-        </div>
-      </v-dialog>
 
       <v-dialog
         v-model="contactsDialogOpen.isOpen"
@@ -234,16 +233,43 @@
             <p>{{ contactsDialogOpen.contact?.nickname }}</p>
           </div>
 
-          <div class="dialogActions">
+          <div class="dialogActions" v-if="tab == 'one'">
+            <v-btn 
+              color="success" 
+              @click="contactsDialogOpen.isOpen = false"
+              variant="tonal"
+            >Cancelar</v-btn>
+
+            <v-btn 
+              color="red" 
+              variant="tonal"
+            >Excluir Contato</v-btn>
+          </div>
+
+          <div class="dialogActions" v-if="tab == 'two'">
             <v-btn 
               color="success" 
               variant="tonal"
               >Solicitar Contato</v-btn>
-              <v-btn 
+
+            <v-btn 
               color="red" 
               @click="contactsDialogOpen.isOpen = false"
               variant="tonal"
             >Cancelar</v-btn>
+          </div>
+
+          <div class="dialogActions" v-if="tab == 'three'">
+            <v-btn 
+              color="success" 
+              variant="tonal"
+              >Aceitar</v-btn>
+
+            <v-btn 
+              color="red" 
+              @click="contactsDialogOpen.isOpen = false"
+              variant="tonal"
+            >Recusar</v-btn>
           </div>
         </div>
       </v-dialog>
@@ -255,6 +281,7 @@
   import { useContactStore } from '@/stores/contact'
   import { useAuthStore } from '@/stores/auth'
   import { useUserStore } from '@/stores/user';
+  import { useRouter } from 'vue-router';
 
   export interface User {
     _id: string;
@@ -264,6 +291,9 @@
     createdAt: Date;
     updatedAt: Date;
     isContactSaved: boolean;
+    isRequest: boolean;
+    senderId: string;
+    receiverId: string;
   }
 
   export interface Contact {
@@ -275,13 +305,14 @@
     updatedAt: Date;
   }
 
+  const router = useRouter()
   const authStore = useAuthStore()
   const contactStore = useContactStore()
   const userStore = useUserStore()
   const tab = ref<string>('')
   const contacts = ref<User[] | []>([])
   const myContacts = ref<Contact[] | []>([])
-  const contactRequests = ref<[]>([1])
+  const contactRequests = ref<Contact[] | []>([])
   const myContactsDialogOpen = ref<{
     isOpen: boolean;
     contact: User | null;
@@ -327,12 +358,40 @@
     contacts.value.map((contact) => {
       contact.isContactSaved = myContacts.value.some(myContact => myContact.contactId._id === contact._id)
     })
+
+    // Atualiza a lista de contatos com o status de solicitação (isRequest)
+    contacts.value.map((contact) => {
+      contact.isRequest = contactRequests.value.some(contactRequest => {
+        // if (contactRequest.userId._id === contact._id || contactRequest.contactId._id === contact._id) return true
+        if (contactRequest.userId._id === contact._id) {
+          contact.senderId = contactRequest.userId._id
+          contact.receiverId = contactRequest.contactId._id
+          return true
+        }
+
+        if (contactRequest.contactId._id === contact._id) {
+          contact.senderId = contactRequest.userId._id
+          contact.receiverId = contactRequest.contactId._id
+          return true
+        }
+      })
+
+      if (contact._id === authStore.userAuth._id) contact.isRequest = false
+    })
+    loading.value = false
+  }
+
+  async function findMyContactsRequests() {
+    loading.value = true
+    const myContactsRequests = await contactStore.findMyContactsRequests(authStore.userAuth._id)
+    contactRequests.value = myContactsRequests
     loading.value = false
   }
 
   watch(tab, () => {
     if (tab.value === 'one') findAllMyContacts()
-    if (tab.value === 'two') findAllContacts()
+    if (tab.value === 'two') findAllContacts(); findMyContactsRequests()
+    if (tab.value === 'three') findMyContactsRequests()
   })
 
   onMounted(() => {
@@ -341,5 +400,5 @@
 </script>
 
 <style scoped>
-@import '@/styles/contacts.page.css';
+@import '@/styles/search.page.css';
 </style>

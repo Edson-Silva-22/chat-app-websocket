@@ -115,6 +115,7 @@ export class ContactsService {
         status: "waiting",
       })
       .or([{ userId: resquest.query.userId }, { contactId: resquest.query.userId }])
+      .populate('userId contactId')
 
       return findContactRequest
 

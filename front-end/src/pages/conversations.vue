@@ -187,7 +187,7 @@
   }
 
   async function findMyContacts() {
-    const response = await contactStore.findAll(authStore.userAuth._id)
+    const response = await contactStore.findAllMyContacts(authStore.userAuth._id)
     contacts.value = response.map((contact: Contact) => ({
      ...contact,
       lastMessageTime: format(new Date(response[0].lastMessageTime), 'HH:mm'),

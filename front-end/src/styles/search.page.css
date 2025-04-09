@@ -10,6 +10,11 @@
   margin-top: 50px;
 }
 
+.tab{
+  font-size: 16px;
+  text-transform: none;
+}
+
 .tabWindow {
   height: calc(100vh - 320px);
   overflow-y: scroll;
@@ -29,6 +34,7 @@
   background-color: #0c1323;
   padding: 20px;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 .contact:hover{

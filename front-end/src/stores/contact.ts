@@ -12,7 +12,13 @@ export const useContactStore = defineStore('contact', () => {
     return response
   }
 
+  async function findMyContactsRequests(userId: string) {
+    const response = await useApi('get', `/contacts/contactsRequest/?userId=${userId}`)
+    return response
+  }
+
   return {
     findAllMyContacts,
+    findMyContactsRequests,
   }
 })

@@ -6,7 +6,6 @@
       <v-form class="vForm" @submit="login">
         <h1 class="vForm_title">Login</h1>
 
-        
         <v-text-field
           name="email"
           placeholder="Informe seu email"
@@ -91,8 +90,13 @@ import Alert from '@/components/Alert.vue';
     await sleep(2000)
     const response = await authStore.login(values)
     if (response) {
-      loading.value = false
-      router.push('/')
+      const savedselectedItemMenu = localStorage.getItem('selectedMenuItem')
+
+      if (savedselectedItemMenu) {
+        loading.value = false
+        const formatJson = JSON.parse(savedselectedItemMenu)
+        router.push(`${formatJson.route}`)
+      }
     }
 
     loading.value = false
