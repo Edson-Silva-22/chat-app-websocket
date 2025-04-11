@@ -40,7 +40,7 @@
             class="contact" 
             v-for="(contact, index) in myContactsCache"
             v-if="myContacts.length > 0 && loading == false"
-            @click="contactsDialogOpen.isOpen = !contactsDialogOpen.isOpen; contactsDialogOpen.contact = contact.contactId; router.push(`/profile/${contact._id}`)"
+            @click="router.push(`/profile/${contact.contactId._id}`)"
             :key="index"
           >
             <div class="avatar">
@@ -53,15 +53,6 @@
                 <p>{{ contact.contactId.nickname }}</p>
                 <p class="secondaryText">{{ contact.contactId.name }}</p>
               </div>
-            </div>
-
-            <div class="actions">
-              <v-btn 
-                color="red" 
-                variant="tonal" 
-                append-icon="mdi-delete"
-                class="text-subtitle-2"
-              >Excluir contato</v-btn>
             </div>
           </div>
 
@@ -84,16 +75,7 @@
             class="contact" 
             v-for="(contact, index) in contacts"
             v-if="contacts.length > 0 && loading == false"
-            @click="() => {
-              if(contact.isContactSaved == false) {
-                contactsDialogOpen.isOpen = !contactsDialogOpen.isOpen 
-                contactsDialogOpen.contact = contact
-              }
-              else{
-                contactsDialogOpen.isOpen = !contactsDialogOpen.isOpen 
-                contactsDialogOpen.contact = contact
-              }
-            }"
+            @click="router.push(`/profile/${contact._id}`)"
             :key="index"
           >
             <div class="avatar">
@@ -106,48 +88,6 @@
                 <p>{{ contact.nickname }}</p>
                 <p class="secondaryText">{{ contact.name }}</p>
               </div>
-            </div>
-
-            <div class="actions">
-              <v-btn
-                class="text-subtitle-2" 
-                color="success" 
-                variant="tonal" 
-                append-icon="mdi-account-arrow-right"
-                v-if="contact.isContactSaved == false && contact.isRequest == false"
-              >Solicitar</v-btn>
-
-              <v-btn
-                class="text-subtitle-2" 
-                color="red" 
-                variant="tonal" 
-                append-icon="mdi-delete"
-                v-if="contact.isContactSaved"
-              >Excluir contato</v-btn>
-
-              <v-btn
-                class="text-subtitle-2" 
-                color="red" 
-                variant="tonal" 
-                append-icon="mdi-account-arrow-right"
-                v-if="authStore.userAuth._id == contact.senderId && contact.isRequest"
-              >Cancelar Solicitação</v-btn>
-
-              <v-btn
-                class="text-subtitle-2" 
-                v-if="authStore.userAuth._id != contact.senderId && contact.isRequest"              
-                color="success"
-                variant="tonal" 
-                append-icon="mdi-account-arrow-left"
-              >Aceitar</v-btn>
-
-              <v-btn
-                class="text-subtitle-2" 
-                v-if="authStore.userAuth._id != contact.senderId && contact.isRequest"              
-                color="red" 
-                variant="tonal" 
-                append-icon="mdi-account-cancel"
-              >Recusar</v-btn>
             </div>
           </div>
 
@@ -180,32 +120,6 @@
                 size="60"
               ></v-avatar>
               <p>{{ authStore.userAuth._id == contact.userId._id ? contact.contactId.nickname : contact.userId.nickname }}</p>
-            </div>
-
-            <div class="actions">
-              <v-btn 
-                v-if="authStore.userAuth._id == contact.userId._id"
-                color="red" 
-                variant="tonal" 
-                append-icon="mdi-account-arrow-right"
-                class="text-subtitle-2"
-              >Cancelar Solicitação</v-btn>
-
-              <v-btn 
-                v-if="authStore.userAuth._id == contact.contactId._id"              
-                color="success"
-                variant="tonal" 
-                append-icon="mdi-account-arrow-left"
-                class="text-subtitle-2"
-              >Aceitar</v-btn>
-
-              <v-btn 
-                v-if="authStore.userAuth._id == contact.contactId._id"              
-                color="red" 
-                variant="tonal" 
-                append-icon="mdi-account-cancel"
-                class="text-subtitle-2"
-              >Recusar</v-btn>
             </div>
           </div>
 
@@ -291,9 +205,11 @@
     createdAt: Date;
     updatedAt: Date;
     isContactSaved: boolean;
-    isRequest: boolean;
-    senderId: string;
-    receiverId: string;
+    contactRequest: {
+      isRequest: boolean;
+      senderId: string;
+      receiverId: string;
+    }
   }
 
   export interface Contact {
@@ -354,30 +270,6 @@
     const response = await userStore.findAll(contactName.value)
     contacts.value = response
     
-    // Atualiza a lista de contatos com o status de contato salvo (isContactSaved)
-    contacts.value.map((contact) => {
-      contact.isContactSaved = myContacts.value.some(myContact => myContact.contactId._id === contact._id)
-    })
-
-    // Atualiza a lista de contatos com o status de solicitação (isRequest)
-    contacts.value.map((contact) => {
-      contact.isRequest = contactRequests.value.some(contactRequest => {
-        // if (contactRequest.userId._id === contact._id || contactRequest.contactId._id === contact._id) return true
-        if (contactRequest.userId._id === contact._id) {
-          contact.senderId = contactRequest.userId._id
-          contact.receiverId = contactRequest.contactId._id
-          return true
-        }
-
-        if (contactRequest.contactId._id === contact._id) {
-          contact.senderId = contactRequest.userId._id
-          contact.receiverId = contactRequest.contactId._id
-          return true
-        }
-      })
-
-      if (contact._id === authStore.userAuth._id) contact.isRequest = false
-    })
     loading.value = false
   }
 

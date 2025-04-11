@@ -70,7 +70,7 @@ export class ContactsService {
       const findAllMyContacts = this.contactsModel.aggregate([
         {
           $match: { 
-            userId: new mongoose.Types.ObjectId(request.query.userId.toString()),
+            userId: new mongoose.Types.ObjectId(request['user'].sub),
             status: 'established'
           }
         },
@@ -109,12 +109,12 @@ export class ContactsService {
     }
   }
 
-  async findMyContactsRequests(resquest: Request) {
+  async findMyContactsRequests(request: Request) {
     try {
       const findContactRequest = await this.contactsModel.find({
         status: "waiting",
       })
-      .or([{ userId: resquest.query.userId }, { contactId: resquest.query.userId }])
+      .or([{ userId: request['user'].sub }, { contactId: request['user'].sub }])
       .populate('userId contactId')
 
       return findContactRequest

@@ -43,6 +43,7 @@ const routes = [
   {
     path: '/profile/:userId',
     name: 'profile',
+    meta: { requiresAuth: true },
     component: () => import('@/pages/profile.vue')
   },
 

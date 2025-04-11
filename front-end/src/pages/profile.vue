@@ -1,6 +1,12 @@
 <template>
   <v-app style="overflow-y: scroll !important; height: 100vh;">
     <header>
+      <v-btn 
+        class="btnBack" 
+        variant="text" 
+        icon="mdi-arrow-left"
+        @click="router.back()"
+      ></v-btn>
       <div class="userInfo">
         <div>
           <v-avatar
@@ -10,12 +16,43 @@
         </div>
   
         <div>
-          <p class="text-h5">Edson@Samghghg</p>
-          <p class="text-h6" style="color: #264594;">Edson Silva</p>
-          <p class="text-h6" style="color: #264594;">edson@gmail.com</p>
+          <p class="text-h5">{{ user?.contact.nickname }}</p>
+          <p class="text-h6" style="color: #264594;">{{ user?.contact.name }}</p>
+          <p class="text-h6" style="color: #264594;">{{ user?.contact.email }}</p>
           <div class="actions">
-            <p style="color: #264594;">Solicitação Recebida</p>
-            <div>
+            <p 
+              style="color: #264594;" 
+              v-if="user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.senderId == authStore.userAuth._id"
+            >Solicitação Enviada</p>
+
+            <p 
+              style="color: #264594;" 
+              v-if="user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.receiverId == authStore.userAuth._id"
+            >Solicitação Recebida</p>
+ 
+            <div v-if="user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.senderId == authStore.userAuth._id">
+              <v-btn 
+                color="red" 
+                variant="tonal" 
+                class="text-subtitle-1"
+              >Cancelar Solicitação</v-btn>
+            </div>
+
+            <div v-if="user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.receiverId == authStore.userAuth._id">
+              <v-btn 
+                color="success" 
+                variant="tonal" 
+                class="text-subtitle-1 mr-2"
+              >Aceitar</v-btn>
+    
+              <v-btn 
+                color="red" 
+                variant="tonal" 
+                class="text-subtitle-1"
+              >Recusar</v-btn>
+            </div>
+
+            <div v-if="user?.isContactSaved">
               <v-btn 
                 color="success" 
                 variant="tonal" 
@@ -104,6 +141,39 @@
     </main>
   </v-app>
 </template>
+
+<script setup lang="ts">
+import { useRouter, useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/user';
+import { useAuthStore } from '@/stores/auth';
+import type { User } from './search.vue';
+
+  export interface Contact {
+    contact: User,
+    isContactSaved: boolean;
+    contactRequest: {
+      isRequest: boolean;
+      senderId: string;
+      receiverId: string;
+    }
+  }
+
+  const route = useRoute()
+  const router = useRouter()
+  const userStore = useUserStore()
+  const authStore = useAuthStore()
+  const user = ref<Contact | null>(null)
+  let { userId } = route.params as { userId: string }
+
+  async function findOneUser(userId: string) {
+    const response = await userStore.findOne(userId)
+    user.value = response
+  }
+  
+  onMounted(async () => {
+    await findOneUser(userId)
+  })
+</script>
 
 <style scoped>
 @import '@/styles/profile.page.css';

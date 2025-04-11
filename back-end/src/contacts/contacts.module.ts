@@ -13,5 +13,6 @@ import { ContactsGateway } from './contacts.gateway';
   ],
   controllers: [ContactsController],
   providers: [ContactsService, ContactsGateway],
+  exports: [ContactsService]
 })
 export class ContactsModule {}
