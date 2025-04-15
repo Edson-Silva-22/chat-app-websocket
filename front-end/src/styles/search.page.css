@@ -20,6 +20,7 @@
   overflow-y: scroll;
   width: 100%;
   max-width: 400px;
+  padding: 0 10px;
 }
 
 .progress-circular{

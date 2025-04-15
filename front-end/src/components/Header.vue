@@ -1,21 +1,26 @@
 <template>
   <v-app-bar :elevation="2" color="#080c16">
-    <template v-slot:prepend>
+    <template v-slot:prepend v-if="display.width.value > 768">
       <p class="header-logo">Talk <v-icon icon="mdi-message-text" color="success"></v-icon> Flow</p>
     </template>
 
     <template v-slot:append>
-      <v-avatar
-        color="red"
-        image="@/assets/pexels-danxavier-1121796.jpg"
-      ></v-avatar>
+      <v-btn icon to="/notifications">
+        <v-badge 
+          v-if="notifications?.isNotification"
+          color="success"
+          floating
+          dot
+          v-bind="props"
+        >
+          <v-icon icon="mdi-bell" size="24"></v-icon>
+        </v-badge>
+      </v-btn>
 
       <v-menu>
         <template v-slot:activator="{ props }">
           <v-btn 
-            color="success" 
             icon="mdi-cog"
-            variant="tonal"
             class="ml-2"
             v-bind="props"
           ></v-btn>
@@ -34,6 +39,12 @@
       </v-menu>
     </template>
 
+    <v-btn 
+      icon="mdi-arrow-left" 
+      variant="text"
+      v-if="props.pageTitle === 'Notificações' && display.width.value <= 768"
+      @click="router.back()"
+    ></v-btn>
     <v-app-bar-title>{{ props.pageTitle }}</v-app-bar-title>
   </v-app-bar>
 </template>
@@ -41,20 +52,32 @@
 <script setup lang="ts">
   import { useAuthStore } from '@/stores/auth';
   import { useRouter } from 'vue-router';
+  import { useDisplay } from 'vuetify';
 
+  const display = useDisplay();
   const props = defineProps<{
     pageTitle: string
   }>()
 
+  const notifications = ref<{
+      isNotification: boolean
+      notificationsCount: (notifications: number) => string
+    } | null>({
+      isNotification: true,
+      notificationsCount: (notifications:number) => {
+        if(notifications > 99) return "99+"
+        return notifications.toString()
+      }
+    })
   const router = useRouter();
   const authStore = useAuthStore();
   const items = ref([
     { 
-      title: 'Settings',
-      onClick: () => null
+      title: 'Perfil',
+      onClick: () => router.push(`/profile/${authStore.userAuth._id}`)
     },
     { 
-      title: 'Logout',
+      title: 'Sair',
       onClick: () => {
         authStore.logout();
         router.push('/login');
@@ -75,6 +98,6 @@
     border: solid rgba(var(--v-theme-success)) 1px;
     border-radius: 5px;
     height: 100%;
-    width: 150px;
+    padding: 0 10px;
   }
 </style>

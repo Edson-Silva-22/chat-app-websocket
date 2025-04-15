@@ -76,17 +76,10 @@ import { useRouter } from 'vue-router';
     },
 
     {
-      icon:'mdi-bell',
+      icon:'mdi-plus-box-outline',
       title: 'Notificações',
-      value: 'notifications',
-      route: '/notifications',
-      notifications: {
-        isNotification: true,
-        notificationsCount: (notifications:number) => {
-          if(notifications > 99) return "99+"
-          return notifications.toString()
-        }
-      }
+      value: 'create',
+      route: '/create'
     },
   ])
   const selectedItemMenu = ref<string>('publications')

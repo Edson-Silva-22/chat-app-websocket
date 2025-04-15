@@ -5,6 +5,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  padding: 0 10px;
+}
+
+.header-logo{
+  font-weight: bold;
+  color: #d2d7e6;
+  margin-bottom: 30px;
 }
 
 .vForm{

@@ -3,8 +3,10 @@
     <v-main class="main">
       <Alert/>
 
+      <h1 class="header-logo">Talk <v-icon icon="mdi-message-text" color="success"></v-icon> Flow</h1>
+
       <v-form class="vForm" @submit="login">
-        <h1 class="vForm_title">Login</h1>
+        <h2 class="vForm_title">Login</h2>
 
         <v-text-field
           name="email"
@@ -81,13 +83,9 @@ import Alert from '@/components/Alert.vue';
   const { value: email } = useField('email')
   const { value: password } = useField('password')
 
-  const sleep = (time:number) => new Promise((resolve) => {
-    setTimeout(resolve, time)
-  })
-
   const login = handleSubmit(async (values) => {
     loading.value = true
-    await sleep(2000)
+
     const response = await authStore.login(values)
     if (response) {
       const savedselectedItemMenu = localStorage.getItem('selectedMenuItem')

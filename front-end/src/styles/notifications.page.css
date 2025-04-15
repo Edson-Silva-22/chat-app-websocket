@@ -1,0 +1,41 @@
+.v-main {
+  background-color: #050911;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.containerNotification{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 10px;
+}
+
+.notification{
+  width: 100%;
+  max-width: 400px;
+  background-color: #0c1323;
+  padding: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.titleNotification{
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #264594;
+}
+
+.descriptionNotification{
+  color: #264594;
+}
+
+.descriptionNotification > span {
+  color: white;
+  font-weight: 700;
+}

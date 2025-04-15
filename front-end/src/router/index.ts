@@ -48,6 +48,13 @@ const routes = [
   },
 
   {
+    path: '/notifications',
+    name: 'notifications',
+    meta: { requiresAuth: true },
+    component: () => import('@/pages/notifications.vue')
+  },
+
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/pages/login.vue')
