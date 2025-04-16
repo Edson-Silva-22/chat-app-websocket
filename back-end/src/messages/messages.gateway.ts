@@ -36,7 +36,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   handleJoinRoom(client: Socket, room: string) {
     //O usuário entra em uma sala criada com o nome do seu proprio id
     client.join(room);
-    console.log('usuário entrou na sala')
+    console.log('usuário entrou na sala ' + room)
   }
 
   @SubscribeMessage('createMessage')
@@ -53,23 +53,23 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
   }
 
   @SubscribeMessage('findAllMessages')
-  async findAll() {
-    const response = await this.messagesService.findAll();
-    this.server.emit('messagesList', response);
+  async findAll(@MessageBody() data: any) {
+    const response = await this.messagesService.findAll(data.userId, data.contactId);
+    this.server.to(data.userId).emit('messagesList', response);
   }
 
-  @SubscribeMessage('findOneMessage')
-  findOne(@MessageBody() id: number) {
-    return this.messagesService.findOne(id);
-  }
+  // @SubscribeMessage('findOneMessage')
+  // findOne(@MessageBody() id: number) {
+  //   return this.messagesService.findOne(id);
+  // }
 
-  @SubscribeMessage('updateMessage')
-  update(@MessageBody() updateMessageDto: UpdateMessageDto) {
-    return this.messagesService.update(updateMessageDto.id, updateMessageDto);
-  }
+  // @SubscribeMessage('updateMessage')
+  // update(@MessageBody() updateMessageDto: UpdateMessageDto) {
+  //   return this.messagesService.update(updateMessageDto.id, updateMessageDto);
+  // }
 
-  @SubscribeMessage('removeMessage')
-  remove(@MessageBody() id: number) {
-    return this.messagesService.remove(id);
-  }
+  // @SubscribeMessage('removeMessage')
+  // remove(@MessageBody() id: number) {
+  //   return this.messagesService.remove(id);
+  // }
 }

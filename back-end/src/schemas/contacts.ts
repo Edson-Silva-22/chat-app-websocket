@@ -1,31 +1,34 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
 
-@Schema({
-  timestamps: true,
-})
-export class Message {
+@Schema({timestamps: true})
+export class Contacts {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   })
-  sender: string
+  userId: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   })
-  receiver: string
+  contactId: string;
 
   @Prop({
     required: false,
   })
-  text: string
+  lastMessage?: string;
 
   @Prop({
     required: false,
   })
-  file: string
+  lastMessageTime?: Date;
+
+  @Prop({
+    required: true,
+  })
+  status: "established" | "refused" | "waiting";
 
   @Prop()
   createdAt?: Date
@@ -34,4 +37,4 @@ export class Message {
   updatedAt?: Date
 }
 
-export const MessageSchema = SchemaFactory.createForClass(Message)
+export const ContactsSchema = SchemaFactory.createForClass(Contacts)

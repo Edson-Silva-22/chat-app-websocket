@@ -1,12 +1,16 @@
 <template>
   <div class="d-flex">
     <div class="divConversation">
-      <v-list v-for="item in [1,2,3,4,5,6,7,8,9,10,11,12,13]" class="pa-0">
+      <v-list class="pa-0">
         <v-list-item 
-          height="70" 
-          value="1"
+          v-for="(contact, index) in contacts"
+          height="80" 
+          :value="contact.contactId._id"
           color="success"
           style="background-color: #0c1323;"
+          :key="contact.contactId._id"
+          :active="selectedContact?.contactId === contact.contactId"
+          @click="selectedContact = contact; findAllMessages()"
         >
           <div class="d-flex ga-3">
             <div class="avatar">
@@ -16,13 +20,13 @@
             </div>
   
             <div class="messagePreview">
-              <v-list-item-title>Alex</v-list-item-title>
-              <p>E ai tudo bem?</p>
+              <v-list-item-title>{{ contact.contactId.name }}</v-list-item-title>
+               <p>{{ contact.lastMessage }}</p>
             </div>
   
             <div class="notification">
               <p class="bg-success">2</p>
-              <v-list-item-subtitle>10:45</v-list-item-subtitle>
+              <v-list-item-subtitle style="font-size: 12px;">{{ contact.lastMessageTime }}</v-list-item-subtitle>
             </div>
           </div>
   
@@ -30,38 +34,39 @@
       </v-list>
     </div>
   
-    <div class="divMessages">
+    <div v-if="selectedContact" class="divMessages">
       <div class="messagesHeader">
         <v-avatar
           image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
         ></v-avatar>
 
         <div>
-          <h3>Alex</h3>
+          <h3>{{ selectedContact?.contactId.name }}</h3>
           <p class="text-success">Online</p>
         </div>
       </div>
 
-      <div class="messagesBody">
+      <div v-if="messagesList.length > 0" class="messagesBody">
         <div 
           v-for="(message, index) in messagesList"
           :class="authStore.userAuth?._id == message.sender ? 'messageSend' :  'messageReceived'"
           :key="index"
         >
           <p>{{ message.text }}</p>
-          <p class="messageTime">10:45</p>
+          <p class="messageTime">{{ message.createdAt }}</p>
         </div>
+      </div>
+
+      <div v-else class="messagesBody d-flex flex-column justify-center align-center">
+        <v-icon icon="mdi-message-minus" size="64" color="#BDBDBD"></v-icon>
+        <p style="color: #BDBDBD;">Nenhuma mensagem</p>
       </div>
 
       <div class="d-flex justify-center">
         <div class="messagesFooter">
-          <v-text-field
-            label="receiverId"
-            v-model="reactiveId"
-          ></v-text-field>
           <v-textarea
             name="name"
-            placeholder="Mesagem"
+            placeholder="Mensagem"
             variant="solo"
             rounded
             hide-details
@@ -84,61 +89,132 @@
       </div>
 
     </div>
+
+    <div v-else class="divMessages d-flex flex-column justify-center align-center">
+      <v-icon icon="mdi-message-text" size="64" color="#BDBDBD"></v-icon>
+      <p style="color: #BDBDBD;">Área de Mensagens</p>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
   import socketClient from '@/plugins/socketClient';
   import { useAuthStore } from '@/stores/auth';
+  import { useContactStore } from '@/stores/contact';
+  import { format } from 'date-fns-tz'
 
   export interface Message {
     _id: string;
     sender: string;
     receiver: string;
     text: string;
-    createdAt: Date;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  export interface Contact {
+    _id: string;
+    userId: {
+      _id: string;
+      name: string;
+    };
+    contactId: {
+      _id: string;
+      name: string;
+    }
+    lastMessage?: string;
+    lastMessageTime?: string;
   }
 
   const authStore = useAuthStore();
+  const contactStore = useContactStore();
   const newMessage = ref<string>('')
   const messagesList = ref<Message[]>([])
-  const reactiveId = ref('')
+  const contacts = ref<Contact[]>([])
+  const selectedContact = ref<Contact>()
 
   function sendMessage() {
     socketClient.emitEvent('createMessage', {
       sender: authStore.userAuth._id,
-      receiver: reactiveId.value,
+      receiver: selectedContact.value?.contactId._id,
       text: newMessage.value,
     })
 
     newMessage.value = ''
   }
 
+  function findAllMessages() {
+    // Emitindo um evento para buscar todas as mensagens
+    socketClient.emitEvent('findAllMessages', {
+      userId: authStore.userAuth._id,
+      contactId: selectedContact.value?.contactId._id,
+    })
+  }
+
   // Função para atualizar a lista de mensagens
   function setMessagesList(data: Message[] | Message) {
-    if (Array.isArray(data) && data?.length > 0) messagesList.value = data
+    
+    // Quando todas as mensagens são carregadas
+    if (Array.isArray(data) && data?.length > 0) {
+      messagesList.value = []
+      data.map((item: Message) => {
+        // Formatar a data para mostrar na tela (HH:mm)
+        const formatDataCreatedAt = new Date(item.createdAt)
+        const formatDataUpdate = new Date(item.updatedAt)
+        
+        messagesList.value.push({
+          _id: item._id,
+          sender: item.sender,
+          receiver: item.receiver,
+          text: item.text,
+          createdAt: `${formatDataCreatedAt.getHours()}:${formatDataCreatedAt.getMinutes() < 10 ? formatDataCreatedAt.getMinutes() + '0' : formatDataCreatedAt.getMinutes()}`,
+          updatedAt: `${formatDataUpdate.getHours()}:${formatDataUpdate.getMinutes() < 10 ? formatDataUpdate.getMinutes() + '0' : formatDataUpdate.getMinutes()}`
+        })
+      })
+    }
 
-    else if (!Array.isArray(data)) messagesList.value.push(data)
+    // Quando uma nova mensagem é enviada
+    else if (!Array.isArray(data)) {
+      messagesList.value.push({
+        _id: data._id,
+        sender: data.sender,
+        receiver: data.receiver,
+        text: data.text,
+        createdAt: format(new Date(data.createdAt), 'HH:mm'),
+        updatedAt: format(new Date(data.updatedAt), 'HH:mm')
+      })
+    }
+  }
+
+  async function findMyContacts() {
+    const response = await contactStore.findAllMyContacts(authStore.userAuth._id)
+    contacts.value = response.map((contact: Contact) => ({
+     ...contact,
+      lastMessageTime: format(new Date(response[0].lastMessageTime), 'HH:mm'),
+    }))
   }
   
   onMounted(async () => {
     // Conectando-se ao socket com o namespace messages
     socketClient.connect('messages')
 
+    // Emitindo evento para que o usuário entre na sua sala individual
+    socketClient.emitEvent('joinRoom', authStore.userAuth._id)
+
     // Emitindo um evento para buscar todas as mensagens
-    socketClient.emitEvent('findAllMessages')
+    //socketClient.emitEvent('findAllMessages', authStore.userAuth._id)
 
     // Subscrevendo o evento de retorno de todas as mensagens para atualizar a lista de mensagens
     socketClient.subscribeEvent('messagesList', setMessagesList)
-
-    // Emitindo evento para que o usuário entre na sua sala individual
-    socketClient.emitEvent('joinRoom', authStore.userAuth._id)
 
     // Emitindo evento para buscar a nova message enviada pelo usuário
     socketClient.subscribeEvent('sendNewMessage', setMessagesList)
 
     // Emitindo evento para buscar as mensagens da sala individual do usuário
     socketClient.subscribeEvent('receiveNewMessage', setMessagesList)
+
+    // Buscando os contatos do usuário
+    await findMyContacts()
   })
 
   onUnmounted(() => {

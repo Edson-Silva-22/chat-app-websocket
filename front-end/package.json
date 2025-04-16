@@ -16,6 +16,7 @@
     "@vee-validate/zod": "^4.15.0",
     "axios": "^1.7.9",
     "core-js": "^3.37.1",
+    "date-fns-tz": "^3.2.0",
     "roboto-fontface": "*",
     "socket.io-client": "^4.8.1",
     "vee-validate": "^4.15.0",

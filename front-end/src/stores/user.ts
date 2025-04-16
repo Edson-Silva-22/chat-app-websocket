@@ -8,8 +8,12 @@ export const useUserStore = defineStore('user', () => {
         return response
     }
 
-    async function findAll() {
-        const response = await useApi('get', '/users')
+    async function findAll(contactName?: string) {
+        let query = ''
+        
+        if (contactName) query += `?contactName=${contactName}`
+
+        const response = await useApi('get', `/users/${query}`)
         return response
     }
 

@@ -4,6 +4,7 @@
   overflow-y: scroll;
   position: relative;
   max-width: 400px;
+  background-color: #050911;
 }
 
 .avatar{
@@ -15,7 +16,6 @@
 }
 
 .messagePreview > p{
-  font-size: 12px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

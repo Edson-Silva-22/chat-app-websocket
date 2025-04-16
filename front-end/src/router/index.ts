@@ -32,12 +32,26 @@ const routes = [
       },
 
       {
-        path: '/contacts',
-        name: 'contacts',
+        path: '/search',
+        name: 'search',
         meta: { requiresAuth: true },
-        component: () => import('@/pages/contacts.vue')
+        component: () => import('@/pages/search.vue')
       }
     ]
+  },
+
+  {
+    path: '/profile/:userId',
+    name: 'profile',
+    meta: { requiresAuth: true },
+    component: () => import('@/pages/profile.vue')
+  },
+
+  {
+    path: '/notifications',
+    name: 'notifications',
+    meta: { requiresAuth: true },
+    component: () => import('@/pages/notifications.vue')
   },
 
   {
