@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar :elevation="2" color="#080c16">
+  <v-app-bar :elevation="2" color="#080c16" class="mx-2">
     <template v-slot:prepend v-if="display.width.value > 768">
       <p class="header-logo">Talk <v-icon icon="mdi-message-text" color="success"></v-icon> Flow</p>
     </template>
@@ -42,10 +42,10 @@
     <v-btn 
       icon="mdi-arrow-left" 
       variant="text"
-      v-if="props.pageTitle === 'Notificações' && display.width.value <= 768"
+      v-if="props.pageTitle === 'Notificações'"
       @click="router.back()"
     ></v-btn>
-    <v-app-bar-title>{{ props.pageTitle }}</v-app-bar-title>
+    <v-app-bar-title class="ma-0">{{ props.pageTitle }}</v-app-bar-title>
   </v-app-bar>
 </template>
 
@@ -113,7 +113,8 @@
     gap: 5px;
     border: solid rgba(var(--v-theme-success)) 1px;
     border-radius: 5px;
-    height: 100%;
+    height: 90%;
     padding: 0 10px;
+    margin-right: 10px;
   }
 </style>

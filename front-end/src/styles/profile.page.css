@@ -9,7 +9,6 @@ header{
   position: absolute;
   left: 10px;
   top: 10px;
-  display: none;
 }
 
 .userInfo{
@@ -71,10 +70,4 @@ main{
 .publicationFooter > span{
   font-size: 14px;
   color: #264594;
-}
-
-@media (max-width: 768px){
-  .btnBack{
-    display: block;
-  }
 }

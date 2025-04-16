@@ -23,7 +23,6 @@
       >
           <v-tab value="one" class="tab">Meus Contatos</v-tab>
           <v-tab value="two" class="tab">Contatos</v-tab>
-          <v-tab value="three" class="tab">Solicitações</v-tab>
       </v-tabs>
 
       <v-tabs-window v-model="tab" class="tabWindow">
@@ -96,97 +95,7 @@
             <p>Nenhum contato encontrado.</p>
           </div>
         </v-tabs-window-item>
-
-        <v-tabs-window-item value="three">
-          <div v-if="loading" class="progress-circular">  
-            <v-progress-circular 
-              indeterminate 
-              color="success"
-              size="86"
-            ></v-progress-circular>
-          </div>
-
-          <div 
-            class="contact" 
-            v-for="(contact, index) in contactRequests"
-            v-if="contactRequests.length > 0 && loading == false"
-            :key="index"
-            @click="contactsDialogOpen.isOpen = !contactsDialogOpen.isOpen; contactsDialogOpen.contact = contact.contactId"
-          >
-            <p class="secondaryText">{{ authStore.userAuth._id == contact.userId._id ? 'Solicitação Enviada' : 'Solicitação Recebida' }}</p>
-            <div class="avatar">
-              <v-avatar
-                image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
-                size="60"
-              ></v-avatar>
-              <p>{{ authStore.userAuth._id == contact.userId._id ? contact.contactId.nickname : contact.userId.nickname }}</p>
-            </div>
-          </div>
-
-          <div v-if="contactRequests.length == 0 && loading == false" class="d-flex flex-column align-center">
-            <v-icon icon="mdi-account-cancel" size="64" color="#BDBDBD"></v-icon>
-            <p>Nenhum contato solicitado.</p>
-          </div>
-        </v-tabs-window-item>
       </v-tabs-window>
-
-      <v-dialog
-        v-model="contactsDialogOpen.isOpen"
-        max-width="400px"
-        width="90%"
-      >
-        <div class="dialogContent">
-          <v-avatar
-            image="@/assets/pexels-justin-shaifer-501272-1222271.jpg"
-            size="200"
-          ></v-avatar>
-
-          <div class="dialogBody">
-            <h2>{{ contactsDialogOpen.contact?.name }}</h2>
-            <p>{{ contactsDialogOpen.contact?.email }}</p>
-            <p>{{ contactsDialogOpen.contact?.nickname }}</p>
-          </div>
-
-          <div class="dialogActions" v-if="tab == 'one'">
-            <v-btn 
-              color="success" 
-              @click="contactsDialogOpen.isOpen = false"
-              variant="tonal"
-            >Cancelar</v-btn>
-
-            <v-btn 
-              color="red" 
-              variant="tonal"
-            >Excluir Contato</v-btn>
-          </div>
-
-          <div class="dialogActions" v-if="tab == 'two'">
-            <v-btn 
-              color="success" 
-              variant="tonal"
-              >Solicitar Contato</v-btn>
-
-            <v-btn 
-              color="red" 
-              @click="contactsDialogOpen.isOpen = false"
-              variant="tonal"
-            >Cancelar</v-btn>
-          </div>
-
-          <div class="dialogActions" v-if="tab == 'three'">
-            <v-btn 
-              color="success" 
-              variant="tonal"
-              >Aceitar</v-btn>
-
-            <v-btn 
-              color="red" 
-              @click="contactsDialogOpen.isOpen = false"
-              variant="tonal"
-            >Recusar</v-btn>
-          </div>
-        </div>
-      </v-dialog>
     </v-main>
   </v-app>
 </template>
@@ -228,21 +137,6 @@
   const tab = ref<string>('')
   const contacts = ref<User[] | []>([])
   const myContacts = ref<Contact[] | []>([])
-  const contactRequests = ref<Contact[] | []>([])
-  const myContactsDialogOpen = ref<{
-    isOpen: boolean;
-    contact: User | null;
-  }>({
-    isOpen: false,
-    contact: null,
-  })
-  const contactsDialogOpen = ref<{
-    isOpen: boolean;
-    contact: User | null;
-  }>({
-    isOpen: false,
-    contact: null,
-  })
   const contactName = ref<string>('')
   const loading = ref(false)
   
@@ -273,17 +167,9 @@
     loading.value = false
   }
 
-  async function findMyContactsRequests() {
-    loading.value = true
-    const myContactsRequests = await contactStore.findMyContactsRequests(authStore.userAuth._id)
-    contactRequests.value = myContactsRequests
-    loading.value = false
-  }
-
   watch(tab, () => {
     if (tab.value === 'one') findAllMyContacts()
-    if (tab.value === 'two') findAllContacts(); findMyContactsRequests()
-    if (tab.value === 'three') findMyContactsRequests()
+    if (tab.value === 'two') findAllContacts();
   })
 
   onMounted(() => {
