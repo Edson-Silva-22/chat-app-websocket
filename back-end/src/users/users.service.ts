@@ -44,7 +44,7 @@ export class UsersService {
 
   async findAll(request: Request) {
     try {
-      const queryFindUsers = this.userModel.find().select('-password')
+      const queryFindUsers = this.userModel.find({ _id: {$ne: request['user'].sub} }).select('-password')
 
       if (request.query.contactName) {
         queryFindUsers.find().or([

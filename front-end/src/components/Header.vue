@@ -7,7 +7,7 @@
     <template v-slot:append>
       <v-btn icon to="/notifications">
         <v-badge 
-          v-if="notifications?.isNotification"
+          v-if="notificationsBadge?.isNotification"
           color="success"
           floating
           dot
@@ -53,13 +53,14 @@
   import { useAuthStore } from '@/stores/auth';
   import { useRouter } from 'vue-router';
   import { useDisplay } from 'vuetify';
+  import socketClient from '@/plugins/socketClient';
 
   const display = useDisplay();
   const props = defineProps<{
     pageTitle: string
   }>()
 
-  const notifications = ref<{
+  const notificationsBadge = ref<{
       isNotification: boolean
       notificationsCount: (notifications: number) => string
     } | null>({
@@ -84,6 +85,21 @@
       }
     }
   ])
+  const notifications = ref([])
+
+  function setNotification(data: [] | any) {
+    notifications.value = data
+  }
+
+  onMounted(() => {
+    // Conectando-se ao socket com o namespace contacts
+    socketClient.connect('contacts')
+
+    // Emitindo evento para que o usuário entre na sua sala individual
+    socketClient.emitEvent('joinRoom', authStore.userAuth._id)
+
+    socketClient.subscribeEvent('contactRequest', setNotification)
+  })
 </script>
 
 <style scoped>

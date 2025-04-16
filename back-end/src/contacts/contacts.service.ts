@@ -22,7 +22,14 @@ export class ContactsService {
         status: 'waiting',
       });
 
-      return createContact;
+      // Popula os campos userId e contactId com os dados da coleção 'users'
+      const populatedContact = await this.contactsModel
+        .findById(createContact._id)
+        .populate('userId')
+        .populate('contactId')
+        .exec();
+
+      return populatedContact;
 
     } catch (error) {
       console.error(error);

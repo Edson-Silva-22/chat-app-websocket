@@ -22,7 +22,7 @@
           <div class="actions">
             <p 
               style="color: #264594;" 
-              v-if="user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.senderId == authStore.userAuth._id"
+              v-if="userId != authStore.userAuth._id && user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.senderId == authStore.userAuth._id"
             >Solicitação Enviada</p>
 
             <p 
@@ -30,7 +30,7 @@
               v-if="user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.receiverId == authStore.userAuth._id"
             >Solicitação Recebida</p>
  
-            <div v-if="user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.senderId == authStore.userAuth._id">
+            <div v-if="userId != authStore.userAuth._id && user?.isContactSaved == false && user.contactRequest.isRequest && user.contactRequest.senderId == authStore.userAuth._id">
               <v-btn 
                 color="red" 
                 variant="tonal" 
@@ -64,6 +64,15 @@
                 variant="tonal" 
                 class="text-subtitle-1"
               >Excluir Contato</v-btn>
+            </div>
+
+            <div v-if="user?.isContactSaved == false && user.contactRequest.isRequest == false">
+              <v-btn 
+                color="success" 
+                variant="tonal" 
+                class="text-subtitle-1"
+                @click="createContactRequest(user.contact._id)"
+              >Solicitar Contato</v-btn>
             </div>
           </div>
         </div>
@@ -147,6 +156,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useAuthStore } from '@/stores/auth';
 import type { User } from './search.vue';
+import socketClient from '@/plugins/socketClient';
 
   export interface Contact {
     contact: User,
@@ -164,10 +174,17 @@ import type { User } from './search.vue';
   const authStore = useAuthStore()
   const user = ref<Contact | null>(null)
   let { userId } = route.params as { userId: string }
+  const loading = ref(false)
 
   async function findOneUser(userId: string) {
     const response = await userStore.findOne(userId)
     user.value = response
+  }
+
+  async function createContactRequest(contactId: string) {
+    loading.value = true
+    socketClient.emitEvent('createContactRequest', {userId:authStore.userAuth._id, contactId})
+    loading.value = false
   }
   
   onMounted(async () => {
